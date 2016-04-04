@@ -1,0 +1,227 @@
+{
+  "kind": "Template",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "gitolite",
+    "creationTimestamp": null,
+    "annotations": {
+      "description": "Openshift template to start a git server that accepts git push and fetch commands where is also publishing gitolite management and gitolite UI."
+    }
+  },
+  "objects": [{
+    "kind": "ImageStream",
+    "apiVersion": "v1",
+    "metadata": {
+      "name": "centos",
+      "creationTimestamp": null
+    },
+    "spec": {
+      "dockerImageRepository": "centos"
+    },
+    "status": {
+      "dockerImageRepository": ""
+    }
+  },
+  {
+    "kind": "ImageStream",
+    "apiVersion": "v1",
+    "metadata": {
+      "name": "gitolite",
+      "creationTimestamp": null
+    },
+    "spec": {},
+    "status": {
+      "dockerImageRepository": ""
+    }
+  },
+  {
+    "kind": "BuildConfig",
+    "apiVersion": "v1",
+    "metadata": {
+      "name": "gitolite-build",
+      "creationTimestamp": null
+    },
+    "spec": {
+      "triggers": [{
+        "type": "Generic",
+        "generic": {
+          "secret": "gitolite-trigger-secret"
+        }
+      },
+      {
+        "type": "ImageChange",
+        "imageChange": {}
+      }],
+      "source": {
+        "type": "Git",
+        "git": {
+          "uri": "https://github.com/iconoeugen/docker-gitolite.git"
+        }
+      },
+      "strategy": {
+        "type": "Docker",
+        "dockerStrategy": {
+          "from": {
+            "kind": "ImageStreamTag",
+            "name": "centos:7"
+          }
+        }
+      },
+      "output": {
+        "to": {
+          "kind": "ImageStreamTag",
+          "name": "gitolite:latest"
+        }
+      },
+      "resources": {},
+      "postCommit": {}
+    },
+    "status": {
+      "lastVersion": 0
+    }
+  },
+  {
+    "kind": "DeploymentConfig",
+    "apiVersion": "v1",
+    "metadata": {
+      "name": "gitolite",
+      "creationTimestamp": null
+    },
+    "spec": {
+      "strategy": {
+        "type": "Rolling",
+        "rollingParams": {
+          "updatePeriodSeconds": 1,
+          "intervalSeconds": 1,
+          "timeoutSeconds": 120
+        },
+        "resources": {}
+      },
+      "triggers": [{
+        "type": "ImageChange",
+        "imageChangeParams": {
+          "automatic": true,
+          "containerNames": [
+            "gitolite"
+          ],
+          "from": {
+            "kind": "ImageStreamTag",
+            "name": "gitolite:latest"
+          }
+        }
+      }, {
+        "type": "ConfigChange"
+      }],
+      "replicas": 1,
+      "test": false,
+      "selector": {
+        "name": "gitolite"
+      },
+      "template": {
+        "metadata": {
+          "creationTimestamp": null,
+          "labels": {
+            "name": "gitolite"
+          }
+        },
+        "spec": {
+          "containers": [{
+            "name": "gitolite",
+            "image": "gitolite",
+            "env": [{
+              "name": "ADMIN_USER",
+              "value": "${ADMIN_USER}"
+            },
+            {
+              "name": "ADMIN_PASS",
+              "value": "${ADMIN_PASS}"
+            }],
+            "resources": {},
+            "terminationMessagePath": "/dev/termination-log",
+            "imagePullPolicy": "IfNotPresent",
+            "capabilities": {},
+            "securityContext": {
+              "capabilities": {},
+              "privileged": false
+            }
+          }],
+          "restartPolicy": "Always",
+          "terminationGracePeriodSeconds": 30,
+          "dnsPolicy": "ClusterFirst",
+          "securityContext": {}
+        }
+      }
+    },
+    "status": {}
+  },
+  {
+    "kind": "Service",
+    "apiVersion": "v1",
+    "metadata": {
+      "name": "gitolite",
+      "creationTimestamp": null
+    },
+    "spec": {
+      "ports": [{
+        "name": "web",
+        "protocol": "TCP",
+        "port": 8080,
+        "targetPort": 8080
+      }],
+      "selector": {
+        "name": "gitolite"
+      },
+      "portalIP": "",
+      "type": "ClusterIP",
+      "sessionAffinity": "None"
+    },
+    "status": {
+      "loadBalancer": {}
+    }
+  },
+  {
+    "kind": "Route",
+    "apiVersion": "v1",
+    "metadata": {
+      "name": "gitolite",
+      "creationTimestamp": null
+    },
+    "spec": {
+      "host": "${APPLICATION_DOMAIN}",
+      "to": {
+        "kind": "Service",
+        "name": "gitolite"
+      },
+      "port":  {
+        "targetPort": "web"
+      },
+      "tls": {
+        "termination": "edge"
+      }
+    },
+    "status": {}
+  }],
+  "parameters": [
+    {
+      "name": "APPLICATION_DOMAIN",
+      "description": "The exposed hostname that will route to the gitolite application",
+      "value": ""
+    },
+    {
+      "name": "ADMIN_USER",
+      "description": "Administrator user name",
+      "value": "admin",
+      "required": true
+    },
+    {
+      "name": "ADMIN_PASS",
+      "description": "Administrator user password",
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}",
+      "required": true
+    }
+  ],
+  "labels": {
+    "template": "gitolite"
+  }
+}
