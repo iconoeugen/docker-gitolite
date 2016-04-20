@@ -21,7 +21,7 @@ RUN sed -e "s/Listen 80.*/Listen 8080/" -i /etc/httpd/conf/httpd.conf \
     && chown apache:root /run/httpd \
     && chmod ug+rwx /run/httpd
 
-COPY git.conf /etc/httpd/conf.d/git.conf
+COPY config/git.conf /etc/httpd/conf.d/git.conf
 COPY entrypoint.sh /entrypoint.sh
 
 RUN chown apache:root /entrypoint.sh \
