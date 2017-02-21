@@ -6,9 +6,10 @@ gitolite:
         - "8080:8080"
     volumes:
         - /tmp/var/lib/git:/var/lib/git:rw
+    user: '100002000:0'
     environment:
-        - http_proxy
-        - https_proxy
-        - ftp_proxy
+        - http_proxy=${http_proxy}
+        - https_proxy=${https_proxy}
+        - ftp_proxy=${ftp_proxy}
         - no_proxy
-        - GIT_PROJECT_NAME=dummy
+        - DEBUG=1
