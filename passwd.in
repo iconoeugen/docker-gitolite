@@ -16,4 +16,4 @@ systemd-network:x:998:997:systemd Network Management:/:/sbin/nologin
 dbus:x:81:81:System message bus:/:/sbin/nologin
 tss:x:59:59:Account used by the trousers package to sandbox the tcsd daemon:/dev/null:/sbin/nologin
 apache:x:${USER_ID}:${GROUP_ID}:Privilege-separated Apache:/usr/share/httpd:/sbin/nologin
-gitolite3:x:${USER_ID}:${GROUP_ID}:Privilege-separated git repository hosting:/var/lib/gitolite3:/bin/sh
+gitolite3:x:${USER_ID}:${GROUP_ID}:Privilege-separated git repository hosting:${HOME}:/bin/sh

@@ -9,16 +9,10 @@ RUN yum -y install epel-release && \
 # Generic environment
 ENV USER apache
 ENV HOME /var/lib/gitolite3
+
+# Gitolite Admin credentials
 ENV ADMIN_USER="admin" \
     ADMIN_PASS="password"
-
-# Gitolite environment
-ENV GITOLITE_HTTP_HOME=${HOME}
-ENV GIT_PROJECTS_LIST=${GITOLITE_HTTP_HOME}/projects.list \
-    GIT_PROJECT_ROOT=${GITOLITE_HTTP_HOME}/repositories \
-    GL_USER=${ADMIN_USER} \
-    GL_BINDIR=/usr/share/gitolite3 \
-    HTPASSWD_FILE=${GITOLITE_HTTP_HOME}/htpasswd
 
 RUN sed -e "s/Listen 80.*/Listen 8080/" -i /etc/httpd/conf/httpd.conf && \
     for dir in ${HOME}/.ssh ${HOME} /var/log/httpd /run/httpd; do \
