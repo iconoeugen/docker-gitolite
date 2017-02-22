@@ -142,7 +142,7 @@ git push test master
 The installation will write logging files in two different locations depending one the application that generates the
 log events:
 
-* httpd: `/var/log/httpd/access_log` and `/var/log/httpd/error_log`
+* httpd: redirected to docker output
 * gitolite: `/var/lib/gitolite3/.gitolite/logs/gitolite-<year>-<month>.log`
 
 ## Managing gitolite
@@ -157,6 +157,15 @@ command:
 
 ```
 git clone http://admin:password@172.17.0.2:8080/git/gitolite-admin
+```
+
+Make gitolite-admin readable by git-daemon until a first commit to ensure you can access gitolite-admin.git repo
+after first commit (POST_COMMIT trigger) give read access to 'daemon' user (see http://gitolite.com/gitolite/gitweb-daemon.html):
+
+```
+repo gitolite-admin
+    RW+     =   admin
+    R       =   daemon
 ```
 
 ### Add rule to allow to create "wild" repositories
