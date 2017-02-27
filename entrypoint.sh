@@ -15,6 +15,9 @@ export LD_PRELOAD=/usr/lib64/libnss_wrapper.so
 umask u=rwx,g=rwx,o=rx
 
 # Setup gitolite
+echo "before gitolite setup"
+ls -la /run/httpd/
+
 gitolite setup -a ${ADMIN_USER}
 
 export GL_USER=${ADMIN_USER}
@@ -30,7 +33,13 @@ export GIT_PROJECT_ROOT=${GL_REPO_BASE}
 export GIT_PROJECTS_LIST="${GITOLITE_HTTP_HOME}/projects.list"
 
 # Prepare permissions for Admin user
+echo "before htpasswd"
+ls -la /run/httpd/
+
 htpasswd -m -b -c ${HTPASSWD_FILE} ${ADMIN_USER} ${ADMIN_PASS}
+
+echo "after htpasswd"
+ls -la /run/httpd/
 
 ## Sed change in gitweb.conf using TEMP File
 TFILE=`mktemp --tmpdir tfile.XXXXX`
@@ -52,7 +61,7 @@ if [[ $# -ge 1 ]]; then
   exec $@
 else
   # httpd won't start correctly if it thinks it is already running.
-  rm -rf /run/httpd/* /tmp/httpd*
+  rm -vrf /run/httpd/* /tmp/httpd*
 
   # Fix for logging on Docker 1.8 (See Docker issue #6880)
   cat <> /var/log/httpd/access_log &
